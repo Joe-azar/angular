@@ -1,36 +1,46 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, catchError, of, throwError } from 'rxjs';
 import { Manga } from './models/manga'; 
 
 @Injectable({
   providedIn: 'root'
 })
 export class MangaService {
-  private apiUrl = 'http://127.0.0.1:8000'; // API URL
+  private apiUrl = 'https://api.manga-db.com'; // API URL
 
   constructor(private http: HttpClient) {}
 
   getMangas(): Observable<Manga[]> {
-    return this.http.get<Manga[]>(`${this.apiUrl}/mangas`);
+    return this.http.get<Manga[]>(`${this.apiUrl}/mangas`).pipe(
+      catchError(error => {
+        console.error('Error fetching mangas:', error);
+        return throwError(() => new Error('Failed to fetch mangas'));
+      })
+    );
   }
+  
 
-  // Favorites handling
-  addToFavorites(manga: any): void {
-    let favorites = this.getFavorites();
-    if (!favorites.some(fav => fav.id === manga.id)) {
+  addToFavorites(manga: Manga): Observable<Manga> {
+    const favorites = this.getFavorites();
+    if (!favorites.find(fav => fav.id === manga.id)) {
       favorites.push(manga);
-      localStorage.setItem('favorites', JSON.stringify(favorites));
+      this.updateFavorites(favorites);
     }
+    return this.http.post<Manga>(`${this.apiUrl}/favorites`, manga);
   }
 
-  removeFromFavorites(mangaId: number): void {
+  removeFromFavorites(mangaId: number): Observable<any> {
     let favorites = this.getFavorites();
     favorites = favorites.filter(fav => fav.id !== mangaId);
-    localStorage.setItem('favorites', JSON.stringify(favorites));
+    this.updateFavorites(favorites);
+    return this.http.delete(`${this.apiUrl}/favorites/${mangaId}`);
   }
 
-  getFavorites(): any[] {
+  getFavorites(): Manga[] {
     return JSON.parse(localStorage.getItem('favorites') || '[]');
+  }
+  private updateFavorites(favorites: Manga[]): void {
+    localStorage.setItem('favorites', JSON.stringify(favorites));
   }
 }

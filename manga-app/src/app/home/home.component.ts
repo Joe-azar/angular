@@ -46,25 +46,22 @@ export class HomeComponent implements OnInit {
     });
 
   }
-  logout() {
-        this.router.navigate(['/login']);
-  }
+  
 
   ngOnInit(): void {
-    this.mangaService.getMangas().subscribe({
-      next: (data) => {
-        this.mangas = data;
-        this.filteredMangas = data;
-      },
-      error: (error) => {
-        console.error('Failed to fetch mangas:', error);
-      }
+    this.mangaService.getMangas().subscribe(mangas => {
+      this.mangas = mangas;
+      this.filteredMangas = mangas;
+      this.updateFavoritesSet();
     });
 
     this.searchForm.valueChanges.subscribe(val => {
       this.filterMangas(val.searchTerm, val.category);
     });
   }
+  logout() {
+    this.router.navigate(['/login']);
+}
 
   filterMangas(searchTerm: string, category: string): void {
     let tempMangas = this.mangas;
@@ -79,24 +76,31 @@ export class HomeComponent implements OnInit {
 
     this.filteredMangas = tempMangas;
   }
-  /*
-  addToFavorites(manga: any): void {
-    this.mangaService.addToFavorites(manga);
-  }
-
-  isFavorite(mangaId: number): boolean {
-    return this.mangaService.getFavorites().some(fav => fav.id === mangaId);
-  }
-  */
-  addToFavorites(manga: any): void {
-    this.favorites.add(manga.id);
+  addToFavorites(manga: Manga): void {
+    this.mangaService.addToFavorites(manga).subscribe({
+      next: () => {
+        this.favorites.add(manga.id);
+        console.log('Added to favorites');
+      },
+      error: (error) => console.error('Could not add to favorites:', error)
+    });
   }
 
   removeFromFavorites(mangaId: number): void {
-    this.favorites.delete(mangaId);
+    this.mangaService.removeFromFavorites(mangaId).subscribe({
+      next: () => {
+        this.favorites.delete(mangaId);
+        console.log('Removed from favorites');
+      },
+      error: (error) => console.error('Could not remove from favorites:', error)
+    });
   }
 
   isFavorite(mangaId: number): boolean {
     return this.favorites.has(mangaId);
+  }
+  private updateFavoritesSet(): void {
+    const favorites = this.mangaService.getFavorites();
+    this.favorites = new Set(favorites.map(fav => fav.id));
   }
 }

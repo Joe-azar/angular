@@ -11,7 +11,7 @@ export class AuthService {
   register(data: { name: string; email: string; password: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, data);
   }
-  private apiUrl = 'http://127.0.0.1:8000'; // API URL
+  private apiUrl = 'https://api.manga-db.com'; // API URL
 
   constructor(private http: HttpClient) {}
 
@@ -22,4 +22,13 @@ export class AuthService {
   logout(): Observable<any> {
     return this.http.post(`${this.apiUrl}/logout`, {});
   }
+
+  addFavorite(mangaId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/favorites`, { mangaId });
+  }
+
+  removeFavorite(mangaId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/favorites/${mangaId}`);
+  }
+
 }

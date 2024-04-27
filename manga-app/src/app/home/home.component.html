@@ -22,8 +22,8 @@
       <mat-card-title>{{ manga.title }}</mat-card-title>
       <mat-card-content>
         <p>Released: {{ manga.releaseYear }}</p>
-        <button mat-button class="add-to-favorites" (click)="addToFavorites(manga)" *ngIf="!isFavorite(manga.id)" class="favorite-button">Add to Favorites</button>
-        <button mat-button class="remove-from-favorites" (click)="removeFromFavorites(manga.id)" *ngIf="isFavorite(manga.id)" class="favorite-button">Remove from Favorites</button>
+        <button mat-button class="add-to-favorites" (click)="addToFavorites(manga)" *ngIf="!isFavorite(manga.id)">Add to Favorites</button>
+        <button mat-button class="remove-from-favorites" (click)="removeFromFavorites(manga.id)" *ngIf="isFavorite(manga.id)">Remove from Favorites</button>
       </mat-card-content>
     </mat-card>
   </div>
